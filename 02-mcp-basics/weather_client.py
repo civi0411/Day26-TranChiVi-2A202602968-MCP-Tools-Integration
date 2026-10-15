@@ -28,11 +28,20 @@ async def main() -> None:
         async with ClientSession(read, write) as session:
             await session.initialize()
 
-            # 1. KHÁM PHÁ tool mà server công bố (không hard-code)
+            # 1. KHÁM PHÁ tool và resource mà server công bố qua MCP
             tools = await session.list_tools()
             print("Tools server cung cấp:")
             for t in tools.tools:
                 print(f"  - {t.name}: {t.description}")
+
+            # Đọc MCP Resource nếu có
+            try:
+                resources = await session.list_resources()
+                if resources.resources:
+                    res_content = await session.read_resource("weather://catalog")
+                    print(f"\n[MCP Resource: weather://catalog]\n  -> {res_content.contents[0].text}")
+            except Exception:
+                pass
 
             # 2. Gọi tool — SERVER thực thi rồi trả kết quả về qua MCP
             for city in ["Hanoi", "Danang", "Haiphong"]:
